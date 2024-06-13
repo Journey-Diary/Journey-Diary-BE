@@ -7,6 +7,7 @@ import com.ppyongppyong.server.common.entity.TokenType;
 import com.ppyongppyong.server.common.exception.CustomException;
 import com.ppyongppyong.server.common.exception.massage.ErrorMsg;
 import com.ppyongppyong.server.common.repository.RefreshTokenRepository;
+import com.ppyongppyong.server.user.entity.UserRoleEnum;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -71,7 +72,7 @@ public class JwtUtil {
 
 
     // 토큰 생성
-    public String createToken(String accountName, AccountRoleEnum role, TokenType tokenType) {
+    public String createToken(String accountName, UserRoleEnum role, TokenType tokenType) {
         Date date = new Date();
         long time = tokenType == TokenType.ACCESS ? ACCESS_TOKEN_TIME : REFRESH_TOKEN_TIME;
 
@@ -116,7 +117,7 @@ public class JwtUtil {
         }
 
         // DB에 저장한 토큰 비교
-        Optional<RefreshToken> savedRefreshToken = refreshTokenRepository.findByAccountUserId(getUserInfoFromToken(refreshToken).getSubject());
+        Optional<RefreshToken> savedRefreshToken = refreshTokenRepository.findByUserId(getUserInfoFromToken(refreshToken).getSubject());
 
         return savedRefreshToken.isPresent() && refreshToken.equals(savedRefreshToken.get().getRefreshToken().substring(7));
     }

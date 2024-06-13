@@ -1,5 +1,7 @@
 package com.ppyongppyong.server.common;
 
+import com.ppyongppyong.server.user.entity.User;
+import com.ppyongppyong.server.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,15 +14,15 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    private final AccountRepository accountRepository;
+    private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String accountName) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
 
-        System.out.println("UserDetailsServiceImpl.loadUserByUsername : " + accountName);
+        System.out.println("UserDetailsServiceImpl.loadUserByUsername : " + userName);
 
-        Account user = accountRepository.findByAccountUserId(accountName)
+        User user = userRepository.findByUserId(userName)
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
-        return new UserDetailsImpl(user, user.getAccountUserId());
+        return new UserDetailsImpl(user, user.getUserId());
     }
 }

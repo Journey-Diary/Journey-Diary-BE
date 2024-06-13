@@ -1,5 +1,7 @@
 package com.ppyongppyong.server.common;
 
+import com.ppyongppyong.server.user.entity.User;
+import com.ppyongppyong.server.user.entity.UserRoleEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,21 +13,21 @@ import java.util.Collection;
 @Slf4j
 public class UserDetailsImpl implements UserDetails {
 
-    private final Account account;
+    private final User user;
     private final String username;
 
-    public UserDetailsImpl(Account account, String username) {
-        this.account = account;
+    public UserDetailsImpl(User user, String username) {
+        this.user = user;
         this.username = username;
     }
 
-    public Account getUser() {
-        return account;
+    public User getUser() {
+        return user;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        AccountRoleEnum role = account.getAccountRole();
+        UserRoleEnum role = user.getUserRole();
         String authority = role.getAuthority();
 
         SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority(authority);

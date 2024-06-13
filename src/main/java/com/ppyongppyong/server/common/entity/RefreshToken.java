@@ -17,7 +17,7 @@ public class RefreshToken {
     private Long id;
 
     @NotBlank
-    private String accountUserId;
+    private String userId;
 
     @NotBlank
     private String refreshToken;
@@ -26,7 +26,7 @@ public class RefreshToken {
 
     public RefreshToken(String token, String email) {
         this.refreshToken = token;
-        this.accountUserId = email;
+        this.userId = email;
     }
 
     public RefreshToken updateToken(String token) {
