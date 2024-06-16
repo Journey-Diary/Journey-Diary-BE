@@ -1,5 +1,6 @@
 package com.ppyongppyong.server.plan.entity;
 
+import com.ppyongppyong.server.common.entity.BaseDomain;
 import com.ppyongppyong.server.common.entity.BaseDomainWithId;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -15,7 +16,12 @@ import java.util.Set;
 @Entity
 @NoArgsConstructor
 @Table(name = "planData")
-public class PlanData extends BaseDomainWithId {
+public class PlanData extends BaseDomain {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @Column(name = "title", nullable = false)
     @Comment("제목")
     private String title;

@@ -3,7 +3,9 @@ package com.ppyongppyong.server.common.exception.massage;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @Getter
@@ -27,10 +29,11 @@ public enum ErrorMsg {
     NOT_LOGGED_ID(UNAUTHORIZED, "로그인이 되어있지 않습니다."),
 
     //403 FORBIDDEN : 권한 없음
-
+    CANNOT_ACCESS_PLAN(HttpStatus.FORBIDDEN, "조회 권한이 없습니다."),
 
     //404 NOT_FOUND : Resource 를 찾을 수 없음
     NOT_FOUND_ACCOUNT(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."),
+    NOT_FOUND_PLAN(HttpStatus.NOT_FOUND, "존재하지 않는 플랜입니다."),
 
     //409 CONFLICT : Resource 의 현재 상태와 충돌. 보통 중복된 데이터 존재
     DUPLICATE_ACCOUNT_ID(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다.");

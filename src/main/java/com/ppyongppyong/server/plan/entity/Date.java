@@ -1,5 +1,6 @@
 package com.ppyongppyong.server.plan.entity;
 
+import com.ppyongppyong.server.common.entity.BaseDomain;
 import com.ppyongppyong.server.common.entity.BaseDomainWithId;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -13,9 +14,13 @@ import java.util.Set;
 @Entity
 @NoArgsConstructor
 @Table(name = "date")
-public class Date extends BaseDomainWithId {
+public class Date extends BaseDomain {
 
-    private Integer orderIndex;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private int orderIndex;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Plan plan;
