@@ -37,4 +37,8 @@ public class UserGroupConnect {
         this.isInvited = isInvited;
         this.userGroupRoleEnum = userGroupRoleEnum;
     }
+
+    public boolean isLeader(){
+        return UserGroupRoleEnum.CREATOR == this.userGroupRoleEnum;
+    }
 }

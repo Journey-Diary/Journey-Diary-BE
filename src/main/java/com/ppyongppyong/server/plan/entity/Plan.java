@@ -1,16 +1,19 @@
 package com.ppyongppyong.server.plan.entity;
 
+import com.ppyongppyong.server.common.entity.BaseDomain;
 import com.ppyongppyong.server.user.entity.Group;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
 @Entity
 @NoArgsConstructor
 @Table(name = "plan")
-public class Plan {
+public class Plan extends BaseDomain {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;

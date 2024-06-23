@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Comment;
 
 import java.time.LocalDate;
@@ -13,6 +14,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Getter
+@Setter
 @Entity
 @NoArgsConstructor
 @Table(name = "planData")

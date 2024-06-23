@@ -42,13 +42,9 @@ public class Post extends BaseDomain {
     @Comment("전화번호")
     private String phone;
 
-    @Column(name = "start_at")
-    @Comment("시작일시")
-    private LocalDateTime startAt;
-
-    @Column(name = "end_at")
-    @Comment("종료 일시")
-    private LocalDateTime endAt;
+    @Column(name = "time")
+    @Comment("시간")
+    private String time;
 
     @ManyToOne
     @JoinColumn(name = "date_id")
@@ -65,14 +61,14 @@ public class Post extends BaseDomain {
     private Plan plan;
 
     @Builder
-    public Post(String title, String content, String location, String x, String y, String phone, LocalDateTime startAt, LocalDateTime endAt, Integer orderIndex, Date date, String memo) {
+    public Post(String title, String content, String location, String x, String y, String phone, String time,
+                LocalDateTime endAt, Integer orderIndex, Date date, String memo) {
         this.title = title;
         this.location = location;
         this.x = x;
         this.y = y;
         this.phone = phone;
-        this.startAt = startAt;
-        this.endAt = endAt;
+        this.time = time;
         this.date = date;
         this.memo = memo;
     }

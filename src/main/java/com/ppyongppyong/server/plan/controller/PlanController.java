@@ -1,6 +1,7 @@
 package com.ppyongppyong.server.plan.controller;
 
 import com.ppyongppyong.server.common.UserDetailsImpl;
+import com.ppyongppyong.server.plan.dto.PlanDataRequestDto;
 import com.ppyongppyong.server.plan.dto.PlanPorJCreateRequest;
 import com.ppyongppyong.server.plan.dto.PlanPorJCreateResponse;
 import com.ppyongppyong.server.plan.dto.PlanDataResponseDto;
@@ -26,8 +27,23 @@ public class PlanController {
 
     @Operation(summary = "plan 조회")
     @GetMapping("/{planId}")
-    public ResponseEntity<PlanDataResponseDto> getPlan(@PathVariable Long planId, @AuthenticationPrincipal UserDetailsImpl userDetails){
+    public ResponseEntity<PlanDataResponseDto> getPlan(@PathVariable Long planId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity.ok(planService.getPlan(planId, userDetails));
+    }
+
+    @Operation(summary = "plan 날짜별 post 생성")
+    @PostMapping("/{planId}")
+    public ResponseEntity<Long> createPost(@PathVariable Long planId, @RequestParam("date") String date,
+                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseEntity.ok(planService.createPost(planId, date, userDetails));
+    }
+
+
+    @Operation(summary = "plan 수정")
+    @PatchMapping("/{planId}")
+    public ResponseEntity<PlanDataResponseDto> updatePlan(@PathVariable Long planId, @RequestBody PlanDataRequestDto requestDto,
+                                                          @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseEntity.ok(planService.updatePlan(planId, requestDto, userDetails));
     }
 
 

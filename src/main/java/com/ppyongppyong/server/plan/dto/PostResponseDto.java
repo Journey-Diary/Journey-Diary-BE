@@ -12,8 +12,7 @@ public class PostResponseDto {
     private String x;
     private String y;
     private String phone;
-    private LocalDateTime startAt;
-    private LocalDateTime endAt;
+    private String time;
     private String memo;
     private int orderIndex;
 }

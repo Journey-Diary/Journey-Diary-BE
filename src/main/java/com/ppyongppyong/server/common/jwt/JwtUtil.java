@@ -72,13 +72,13 @@ public class JwtUtil {
 
 
     // 토큰 생성
-    public String createToken(String accountName, UserRoleEnum role, TokenType tokenType) {
+    public String createToken(String userName, UserRoleEnum role, TokenType tokenType) {
         Date date = new Date();
         long time = tokenType == TokenType.ACCESS ? ACCESS_TOKEN_TIME : REFRESH_TOKEN_TIME;
 
         return BEARER_PREFIX +
                 Jwts.builder()
-                        .setSubject(accountName)
+                        .setSubject(userName)
                         .claim(AUTHORIZATION_KEY, role)
                         .setExpiration(new Date(date.getTime() + time))
                         .setIssuedAt(date)
