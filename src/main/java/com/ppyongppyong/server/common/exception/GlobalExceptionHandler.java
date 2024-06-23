@@ -1,7 +1,6 @@
 package com.ppyongppyong.server.common.exception;
 
 import com.ppyongppyong.server.common.dto.StatusResponseDto;
-import com.ppyongppyong.server.common.exception.massage.ErrorMsg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -18,37 +17,34 @@ import java.util.stream.Collectors;
 @Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
     @ExceptionHandler(value = {CustomException.class})
     protected ResponseEntity<StatusResponseDto.Error> handleCustomException(CustomException e) {
-        log.error("handleCustomException throw CustomException : {}", e.getErrorMsg());
+        log.error("handleCustomException throw CustomException : {}", e.getErrorMsg(), e);
         return ResponseEntity.status(e.getErrorMsg().getHttpStatus())
                 .body(new StatusResponseDto.Error(e.getErrorMsg().getHttpStatus().value(), e.getErrorMsg().getMessage()));
-
-
     }
 
-    //정규식
     @ExceptionHandler({BindException.class})
-    public StatusResponseDto<?> bindException(BindException ex) {
-        return StatusResponseDto.toAllExceptionResponseEntity(HttpStatus.BAD_REQUEST,
-                ex.getFieldError().getDefaultMessage());
+    public ResponseEntity<StatusResponseDto.Error> bindException(BindException ex) {
+        String errorMessage = ex.getFieldError() != null ? ex.getFieldError().getDefaultMessage() : "Invalid request";
+        log.error("BindException: {}", errorMessage, ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new StatusResponseDto.Error(HttpStatus.BAD_REQUEST.value(), errorMessage));
     }
 
-//    //토큰 없을시
-//    @ExceptionHandler({MissingRequestHeaderException.class})
-//    public StatusResponseDto<?> missingRequestHeaderException(MissingRequestHeaderException ex) {
-//        return StatusResponseDto.toAllExceptionResponseEntity(ErrorMsg.NOT_LOGGED_ID);
-//    }
-
-    // 500
     @ExceptionHandler({Exception.class})
-    public StatusResponseDto<?> handleAll(final Exception ex) {
-        return StatusResponseDto.toAllExceptionResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
+    public ResponseEntity<StatusResponseDto.Error> handleAll(final Exception ex) {
+        log.error("Unhandled exception: ", ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new StatusResponseDto.Error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"));
     }
 
     @ExceptionHandler(value = {IOException.class})
-    public StatusResponseDto<?> handleIOException(IOException ex) {
-        return StatusResponseDto.toAllExceptionResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+    public ResponseEntity<StatusResponseDto.Error> handleIOException(IOException ex) {
+        log.error("IOException: ", ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new StatusResponseDto.Error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "I/O error occurred"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -56,7 +52,9 @@ public class GlobalExceptionHandler {
         List<String> errors = e.getBindingResult().getFieldErrors().stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.toList());
-        return ResponseEntity.status(ErrorMsg.InValidException.getHttpStatus())
-                .body(new StatusResponseDto.Error<>(400, errors.get(0)));
+        String errorMessage = errors.isEmpty() ? "Validation error" : errors.get(0);
+        log.error("MethodArgumentNotValidException: {}", errorMessage, e);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new StatusResponseDto.Error(HttpStatus.BAD_REQUEST.value(), errorMessage));
     }
 }
