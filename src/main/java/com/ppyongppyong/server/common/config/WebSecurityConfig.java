@@ -21,6 +21,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Arrays;
@@ -29,15 +30,16 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @RequiredArgsConstructor
-@EnableWebSecurity
-@EnableGlobalMethodSecurity(securedEnabled = true)
-//@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET) //붐비 붐비에 추가 되어 있는 내용
+@EnableWebSecurity//@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET) //붐비 붐비에 추가 되어 있는 내용
 public class WebSecurityConfig implements WebMvcConfigurer {
 
     private final JwtUtil jwtUtil;
-//    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-//    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/favicon.ico")
+                .addResourceLocations("classpath:/static/");
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -49,9 +51,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     public WebSecurityCustomizer webSecurityCustomizer() {
 
         return (web) -> web.ignoring()
-                //.requestMatchers(PathRequest.toH2Console())
-//                .antMatchers("/swagger-ui/**", "/v3/api-docs/**")
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**")
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/docs/**")
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 
@@ -68,13 +68,13 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         //회원가입, 로그인,조회까지는 security 인증 없이도 가능함
         http.authorizeRequests()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
-//                .antMatchers("/docs").permitAll()
+                .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/docs/**").permitAll()
 //                .antMatchers("/api/**").permitAll()
-//                .antMatchers("/api/account/signup").permitAll()
-//                .antMatchers("/api/account/login").permitAll()
+                .requestMatchers("/api/user/signup").permitAll()
+                .requestMatchers("/api/user/login").permitAll()
                 // 멤버조회
 //                .antMatchers("/api/account/**").permitAll()
-                .requestMatchers("**").permitAll()
+//                .requestMatchers("**").permitAll()
                 // 라디오조회
 //                .antMatchers(HttpMethod.GET, "/api/audioclip/**").permitAll()
 //                .antMatchers(HttpMethod.GET, "/api/audioAlbum/**").permitAll()
@@ -103,15 +103,13 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry
                 .addMapping("/**")
-                .allowedOrigins("http://localhost:3000")
-                .allowedOrigins("http://localhost:8080")
-                .allowedOrigins("http://15.164.44.185")
+                .allowedOrigins("http://localhost:3000", "http://localhost:8080", "http://15.164.44.185")
                 .allowedOriginPatterns("*") // 허용되는 출처 패턴을 사용하여 와일드카드(*) 지정
                 .allowedMethods("*")
                 .allowedHeaders("*")
                 .exposedHeaders("*")
                 .allowCredentials(true)
-                .maxAge((long) 3600 * 24 * 365);
+                .maxAge(3600 * 24 * 365);
     }
 
     @Bean
