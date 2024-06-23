@@ -1,10 +1,12 @@
 package com.ppyongppyong.server.plan.entity;
 
+import com.ppyongppyong.server.common.entity.BaseDomain;
 import com.ppyongppyong.server.common.entity.BaseDomainWithId;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Comment;
 
 import java.time.LocalDate;
@@ -12,10 +14,16 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Getter
+@Setter
 @Entity
 @NoArgsConstructor
 @Table(name = "planData")
-public class PlanData extends BaseDomainWithId {
+public class PlanData extends BaseDomain {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @Column(name = "title", nullable = false)
     @Comment("제목")
     private String title;

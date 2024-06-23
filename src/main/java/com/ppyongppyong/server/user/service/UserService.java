@@ -57,7 +57,7 @@ public class UserService {
                 userRepository.save(user);
                 return SIGN_UP_SUCCESS.getMessage();
             }
-            throw new CustomException(ErrorMsg.DUPLICATE_ACCOUNT_ID);
+            throw new CustomException(ErrorMsg.DUPLICATE_USER_ID);
         }
 
         User user = userMapper.signupRequestDtoToEntity(password, userSignupRequestDto);
@@ -72,7 +72,7 @@ public class UserService {
         String password = userLoginRequestDto.getPassword();
 
         User user = userRepository.findByUserId(accountUserId).orElseThrow(
-                () -> new CustomException(ErrorMsg.NOT_FOUND_ACCOUNT)
+                () -> new CustomException(ErrorMsg.NOT_FOUND_USER)
         );
 
         if(!passwordEncoder.matches(password, user.getPassword())) {

@@ -1,6 +1,6 @@
 package com.ppyongppyong.server.plan.entity;
 
-import com.ppyongppyong.server.common.entity.BaseDomainWithId;
+import com.ppyongppyong.server.common.entity.BaseDomain;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,31 +16,35 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Table(name = "post")
 @Setter
-public class Post extends BaseDomainWithId {
+public class Post extends BaseDomain {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "title")
     @Comment("제목")
     private String title;
 
-    @Column(name = "content", columnDefinition = "TEXT")
-    @Comment("내용")
-    private String content;
-
     @Column(name = "location", columnDefinition = "TEXT")
     @Comment("위치")
     private String location;
 
-    @Column(name = "start_at")
-    @Comment("시작일시")
-    private LocalDateTime startAt;
+    @Column(name = "x")
+    @Comment("x 좌표")
+    private String x;
 
-    @Column(name = "end_at")
-    @Comment("종료 일시")
-    private LocalDateTime endAt;
+    @Column(name = "y")
+    @Comment("y 좌표")
+    private String y;
 
-    @Column(name = "order_index")
-    @Comment("순서")
-    private Integer orderIndex;
+    @Column(name = "phone")
+    @Comment("전화번호")
+    private String phone;
+
+    @Column(name = "time")
+    @Comment("시간")
+    private String time;
 
     @ManyToOne
     @JoinColumn(name = "date_id")
@@ -51,14 +55,20 @@ public class Post extends BaseDomainWithId {
     @Comment("메모")
     private String memo;
 
+    @ManyToOne
+    @JoinColumn(name = "plan_id")
+    @Comment("플랜")
+    private Plan plan;
+
     @Builder
-    public Post(String title, String content, String location, LocalDateTime startAt, LocalDateTime endAt, Integer orderIndex, Date date, String memo) {
+    public Post(String title, String content, String location, String x, String y, String phone, String time,
+                LocalDateTime endAt, Integer orderIndex, Date date, String memo) {
         this.title = title;
-        this.content = content;
         this.location = location;
-        this.startAt = startAt;
-        this.endAt = endAt;
-        this.orderIndex = orderIndex;
+        this.x = x;
+        this.y = y;
+        this.phone = phone;
+        this.time = time;
         this.date = date;
         this.memo = memo;
     }
