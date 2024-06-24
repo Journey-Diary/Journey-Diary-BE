@@ -1,10 +1,7 @@
 package com.ppyongppyong.server.plan.controller;
 
 import com.ppyongppyong.server.common.UserDetailsImpl;
-import com.ppyongppyong.server.plan.dto.PlanDataRequestDto;
-import com.ppyongppyong.server.plan.dto.PlanPorJCreateRequest;
-import com.ppyongppyong.server.plan.dto.PlanPorJCreateResponse;
-import com.ppyongppyong.server.plan.dto.PlanDataResponseDto;
+import com.ppyongppyong.server.plan.dto.*;
 import com.ppyongppyong.server.plan.service.PlanService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +30,8 @@ public class PlanController {
 
     @Operation(summary = "plan 날짜별 post 생성")
     @PostMapping("/{planId}")
-    public ResponseEntity<Long> createPost(@PathVariable Long planId, @RequestParam("date") String date,
-                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<PostCreateResponse> createPost(@PathVariable Long planId, @RequestParam("date") String date,
+                                                         @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity.ok(planService.createPost(planId, date, userDetails));
     }
 

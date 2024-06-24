@@ -3,7 +3,10 @@ package com.ppyongppyong.server.plan.service;
 import com.ppyongppyong.server.common.UserDetailsImpl;
 import com.ppyongppyong.server.common.exception.CustomException;
 import com.ppyongppyong.server.plan.dto.*;
-import com.ppyongppyong.server.plan.entity.*;
+import com.ppyongppyong.server.plan.entity.Date;
+import com.ppyongppyong.server.plan.entity.Plan;
+import com.ppyongppyong.server.plan.entity.PlanData;
+import com.ppyongppyong.server.plan.entity.Post;
 import com.ppyongppyong.server.plan.repository.DateRepository;
 import com.ppyongppyong.server.plan.repository.PlanDataRepository;
 import com.ppyongppyong.server.plan.repository.PlanRepository;
@@ -23,6 +26,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.ppyongppyong.server.common.exception.massage.ErrorMsg.*;
 import static com.ppyongppyong.server.user.entity.UserGroupRoleEnum.CREATOR;
@@ -78,17 +82,19 @@ public class PlanService {
         if (!userIds.contains(user.getId())) {
             // 작성되지 않은 플랜 조회 불가
             if (planData == null)
-                new CustomException(NOT_FOUND_PLAN);
+                throw new CustomException(NOT_FOUND_PLAN);
             // 여행일이 끝나지 않았거나 공개가 아닌 경우 조회 불가
-            if (!LocalDate.now().isAfter(planData.getEndedDate()) || !planData.getIsOpen())
-                new CustomException(CANNOT_ACCESS_PLAN);
+            if (!LocalDate.now().isAfter(planData.getEndDate()) || !planData.getIsOpen())
+                throw new CustomException(CANNOT_ACCESS_PLAN);
+            planData.increaseHit();
+            planDataRepository.save(planData);
         }
 
         return planDataMapper.planDataToPlanResponse(planData, plan);
     }
 
     @Transactional
-    public Long createPost(Long planId, String dateStr, UserDetailsImpl userDetails) {
+    public PostCreateResponse createPost(Long planId, String dateStr, UserDetailsImpl userDetails) {
 
         // 유저 인증
         User user = userRepository.findByUserId(userDetails.getUsername()).orElseThrow(() -> new CustomException(NOT_FOUND_USER));
@@ -99,12 +105,15 @@ public class PlanService {
         // 플랜 세부 정보 조회
         PlanData planData = planDataRepository.findByPlan(plan).orElse(null);
 
+        if (planData.getStartDate() == null || planData.getEndDate() == null)
+            throw new CustomException(CANNOT_CREATE_POST);
+
         // 팀장인지 확인
         validateLeader(user, plan);
 
         // date가 해당 plan에 유효한지 확인
-        int startDate = Integer.parseInt(planData.getStartedDate().format(DateTimeFormatter.ofPattern("yyyyMMdd")));
-        int endDate = Integer.parseInt(planData.getEndedDate().format(DateTimeFormatter.ofPattern("yyyyMMdd")));
+        int startDate = localDateToInteger(planData.getStartDate());
+        int endDate = localDateToInteger(planData.getEndDate());
         int date = Integer.parseInt(dateStr);
         if (date < startDate || date > endDate)
             throw new CustomException(INVALID_POST_DATE);
@@ -118,7 +127,7 @@ public class PlanService {
         postRepository.save(post);
 
         //포스트 아이디 반환
-        return post.getId();
+        return PostCreateResponse.builder().id(post.getId()).build();
     }
 
     private void validateLeader(User user, Plan plan) {
@@ -137,6 +146,7 @@ public class PlanService {
 
     /**
      * 플랜 업데이트 (Patch)
+     *
      * @param planId
      * @param requestDto
      * @param userDetails
@@ -152,19 +162,44 @@ public class PlanService {
         Plan plan = planRepository.findById(planId).orElseThrow(() -> new CustomException(NOT_FOUND_PLAN));
 
         // 플랜 세부 정보 조회
-        PlanData planData = planDataRepository.findByPlan(plan).orElse(null);
-        if (planData == null)
+        PlanData planData2 = planDataRepository.findByPlan(plan).orElse(null);
+        PlanData planData = planData2;
+        if (planData == null) {
             planData = PlanData.builder().build();
+            planData.setPlan(plan);
+        }
 
         // 팀장인지 확인
         validateLeader(user, plan);
 
         if (requestDto.getTitle() != null)
             planData.setTitle(requestDto.getTitle());
-        if (requestDto.getStartedDate() != null)
-            planData.setStartedDate(requestDto.getStartedDate());
-        if (requestDto.getEndedDate() != null)
-            planData.setEndedDate(requestDto.getEndedDate());
+
+        // 최초 여행 날짜 설정 시, 시작 종료일 둘다 입력해야 함
+        if (planData.getStartDate() == null && planData.getEndDate() == null) {
+            // 둘중에 하나만 입력한 경우 에러
+            if ((requestDto.getStartDate() == null) != (requestDto.getEndDate() == null))
+                throw new CustomException(INVALID_PLAN_DATE);
+        }
+
+        if (requestDto.getStartDate() != null)
+            planData.setStartDate(stringToLocalDate(requestDto.getStartDate()));
+        if (requestDto.getEndDate() != null)
+            planData.setEndDate(stringToLocalDate(requestDto.getEndDate()));
+        // 시작날짜, 종료날짜 유효성 체크
+        planData.validDate();
+
+        if (planData2 != null && planData2.existDate()) {
+            List<Date> dates = dateRepository.findByPlan(plan);
+//            dateRepository.deleteAll(dates); 삭제하면 안됨 post에서 date를 들고있음
+        } else {
+            // 저장된 planData가 없거나 최초 날짜 설정이라면
+            int days = localDateToInteger(planData.getEndDate()) - localDateToInteger(planData.getStartDate());
+            List<Date> dates = IntStream.range(1, days + 1)
+                    .mapToObj(i -> Date.builder().orderIndex(i).plan(plan).build()).collect(Collectors.toList());
+            dateRepository.saveAll(dates);
+        }
+
         if (requestDto.getLocation() != null)
             planData.setLocation(requestDto.getLocation());
         if (requestDto.getIsOpen() != null)
@@ -175,5 +210,15 @@ public class PlanService {
         planDataRepository.save(planData);
 
         return planDataMapper.planDataToPlanResponse(planData, plan);
+    }
+
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+
+    private LocalDate stringToLocalDate(String date) {
+        return LocalDate.parse(date, formatter);
+    }
+
+    private int localDateToInteger(LocalDate date) {
+        return Integer.parseInt(date.format(formatter));
     }
 }

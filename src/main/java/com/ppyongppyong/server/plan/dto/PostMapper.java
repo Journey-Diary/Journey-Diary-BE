@@ -11,4 +11,6 @@ public interface PostMapper {
     PostMapper INSTANCE = Mappers.getMapper(PostMapper.class);
 
     PostResponseDto postToPostResponse(Post post, int orderIndex);
+
+    PostCreateResponse postToPostCreateResponse(Post post);
 }

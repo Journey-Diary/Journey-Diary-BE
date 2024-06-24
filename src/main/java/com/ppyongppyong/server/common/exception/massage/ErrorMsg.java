@@ -24,6 +24,8 @@ public enum ErrorMsg {
     NOT_MATCH_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 틀렸습니다."),
     InValidException(HttpStatus.BAD_REQUEST, "값이 잘못되었습니다."),
     INVALID_POST_DATE(BAD_REQUEST, "유효하지 않은 날짜입니다."),
+    INVALID_PLAN_DATE(BAD_REQUEST, "날짜 선택이 잘못되었습니다"),
+
 
     //401 UNAUTHORIZED : 인증되지 않은 사용자
     NOT_LOGGED_ID(UNAUTHORIZED, "로그인이 되어있지 않습니다."),
@@ -31,6 +33,7 @@ public enum ErrorMsg {
     //403 FORBIDDEN : 권한 없음
     CANNOT_ACCESS_PLAN(HttpStatus.FORBIDDEN, "조회 권한이 없습니다."),
     CANNOT_UPDATE_POST(HttpStatus.FORBIDDEN, "작성 및 수정 권한이 없습니다."),
+    CANNOT_CREATE_POST(HttpStatus.FORBIDDEN, "날짜 선택 후 포스트를 생성할 수 있습니다"),
 
     //404 NOT_FOUND : Resource 를 찾을 수 없음
     NOT_FOUND_USER(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."),
