@@ -180,17 +180,21 @@ public class PlanService {
             // 둘중에 하나만 입력한 경우 에러
             if ((requestDto.getStartDate() == null) != (requestDto.getEndDate() == null))
                 throw new CustomException(INVALID_PLAN_DATE);
-        }
 
-        if (requestDto.getStartDate() != null)
-            planData.setStartDate(stringToLocalDate(requestDto.getStartDate()));
-        if (requestDto.getEndDate() != null)
-            planData.setEndDate(stringToLocalDate(requestDto.getEndDate()));
+            // 임시에러, 날짜는 수정 불가, 최초 생성시에만 설정 가능 (추후 변경해야 함)
+        } else if (requestDto.getStartDate() != null || requestDto.getEndDate() != null)
+            throw new IllegalStateException();
+
+
+//        if (requestDto.getStartDate() != null)
+//            planData.setStartDate(stringToLocalDate(requestDto.getStartDate()));
+//        if (requestDto.getEndDate() != null)
+//            planData.setEndDate(stringToLocalDate(requestDto.getEndDate()));
         // 시작날짜, 종료날짜 유효성 체크
         planData.validDate();
 
         if (planData2 != null && planData2.existDate()) {
-            List<Date> dates = dateRepository.findByPlan(plan);
+//            List<Date> dates = dateRepository.findByPlan(plan);
 //            dateRepository.deleteAll(dates); 삭제하면 안됨 post에서 date를 들고있음
         } else {
             // 저장된 planData가 없거나 최초 날짜 설정이라면
