@@ -15,7 +15,7 @@ public class UserGroupConnect {
     private Long id;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "account_id")
+    @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne(cascade = CascadeType.ALL)
@@ -36,5 +36,9 @@ public class UserGroupConnect {
         this.group = group;
         this.isInvited = isInvited;
         this.userGroupRoleEnum = userGroupRoleEnum;
+    }
+
+    public boolean isLeader(){
+        return UserGroupRoleEnum.CREATOR == this.userGroupRoleEnum;
     }
 }
