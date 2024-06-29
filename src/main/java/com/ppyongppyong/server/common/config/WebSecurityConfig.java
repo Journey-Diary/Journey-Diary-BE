@@ -35,12 +35,6 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 
     private final JwtUtil jwtUtil;
 
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/favicon.ico")
-                .addResourceLocations("classpath:/static/");
-    }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
