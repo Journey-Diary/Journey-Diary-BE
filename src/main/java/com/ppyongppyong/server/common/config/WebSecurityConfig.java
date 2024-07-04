@@ -66,13 +66,6 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 //                .antMatchers("/api/**").permitAll()
                 .requestMatchers("/api/user/signup").permitAll()
                 .requestMatchers("/api/user/login").permitAll()
-                // 멤버조회
-//                .antMatchers("/api/account/**").permitAll()
-//                .requestMatchers("**").permitAll()
-                // 라디오조회
-//                .antMatchers(HttpMethod.GET, "/api/audioclip/**").permitAll()
-//                .antMatchers(HttpMethod.GET, "/api/audioAlbum/**").permitAll()
-//                .antMatchers("/webSocket").permitAll()
                 .anyRequest().authenticated()
                 // JWT 인증/인가를 사용하기 위한 설정
                 .and()
@@ -97,7 +90,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry
                 .addMapping("/**")
-                .allowedOrigins("http://localhost:3000", "http://localhost:8080", "http://15.164.44.185")
+                .allowedOrigins("http://localhost:3000", "http://localhost:8080", "http://13.125.83.69")
                 .allowedOriginPatterns("*") // 허용되는 출처 패턴을 사용하여 와일드카드(*) 지정
                 .allowedMethods("*")
                 .allowedHeaders("*")

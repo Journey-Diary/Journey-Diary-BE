@@ -1,5 +1,6 @@
 package com.ppyongppyong.server.user.dto;
 
+import com.amazonaws.services.ec2.model.UserData;
 import com.ppyongppyong.server.user.entity.User;
 import com.ppyongppyong.server.user.entity.UserRoleEnum;
 import org.mapstruct.Mapper;
@@ -22,4 +23,7 @@ public interface UserMapper {
     User signupRequestDtoToEntity(String password, UserSignupRequestDto dto);
 
     UserLoginResponseDto entityToLoginResponseDto(User user, String accessToken, String refreshToken);
+
+    UserDataDto entityToUserDataDto(User user);
+
 }

@@ -1,6 +1,7 @@
 package com.ppyongppyong.server.user.controller;
 
 import com.ppyongppyong.server.common.UserDetailsImpl;
+import com.ppyongppyong.server.user.dto.UserDataDto;
 import com.ppyongppyong.server.user.dto.UserLoginRequestDto;
 import com.ppyongppyong.server.user.dto.UserLoginResponseDto;
 import com.ppyongppyong.server.user.dto.UserSignupRequestDto;
@@ -13,13 +14,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -47,6 +46,12 @@ public class UserController {
     public ResponseEntity<String> reIssueAccessToken(@Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl userDetails,
                                                      HttpServletResponse httpServletResponse) throws UnsupportedEncodingException {
         return ResponseEntity.ok(userService.reIssueAccessToken(userDetails.getUser(), httpServletResponse));
+    }
+
+    @Operation(summary = "팀원 검색", description = "팀원을 초대하기 위해 유저 검색")
+    @GetMapping("/search")
+    public ResponseEntity<List<UserDataDto>> searchUser(@Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam String searchStr) {
+        return ResponseEntity.ok(userService.searchUser(userDetails.getUser(), searchStr));
     }
 
 }
