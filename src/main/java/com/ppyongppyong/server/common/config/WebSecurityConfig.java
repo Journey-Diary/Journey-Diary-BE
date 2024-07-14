@@ -57,6 +57,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
                 .sessionManagement((sessionManagement) ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
+
         //회원가입, 로그인,조회까지는 security 인증 없이도 가능함
         http.authorizeRequests()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
@@ -73,18 +74,17 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         return http.build();
     }
 
-//    @Override
-//    public void addCorsMappings(CorsRegistry registry) {
-//        registry
-//                .addMapping("/**")
-//                .allowedOrigins("http://localhost:3000", "http://localhost:8080", "http://13.125.83.69")
-//                .allowedOriginPatterns("*") // 허용되는 출처 패턴을 사용하여 와일드카드(*) 지정
-//                .allowedMethods("*")
-//                .allowedHeaders("*")
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry
+                .addMapping("/**")
+                .allowedOrigins("http://localhost:3000", "http://localhost:8080", "http://13.125.83.69")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+                .allowedHeaders("*")
 //                .exposedHeaders("*")
-//                .allowCredentials(true)
-//                .maxAge(3600 * 24 * 365);
-//    }
+                .allowCredentials(true)
+                .maxAge(3600 * 24 * 365);
+    }
 //
 //    @Bean
 //    public CorsConfigurationSource corsConfigurationSource() {
@@ -105,7 +105,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedOrigins(List.of("http://localhost:3000/", "http://localhost:8080/", "http://13.125.83.69"));
-        corsConfiguration.setAllowedHeaders(List.of(""));
+        corsConfiguration.setAllowedHeaders(List.of("*"));
         corsConfiguration.setMaxAge(3600L * 24 * 365);
         corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "PATCH"));
         corsConfiguration.setAllowCredentials(true); // 쿠키 허용
