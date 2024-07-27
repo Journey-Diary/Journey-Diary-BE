@@ -25,6 +25,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -51,9 +52,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http.cors().configurationSource(corsConfigurationSource());
-        http
-                .csrf(AbstractHttpConfigurer::disable)
+        http.csrf(AbstractHttpConfigurer::disable)
                 //로그인 된 후 토큰없이 자동 인증되는 것을 방지
                 .sessionManagement((sessionManagement) ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -63,32 +62,14 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         http.authorizeRequests()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                 .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/docs/**").permitAll()
-//                .antMatchers("/api/**").permitAll()
                 .requestMatchers("/api/user/signup").permitAll()
                 .requestMatchers("/api/user/login").permitAll()
-                // 멤버조회
-//                .antMatchers("/api/account/**").permitAll()
-//                .requestMatchers("**").permitAll()
-                // 라디오조회
-//                .antMatchers(HttpMethod.GET, "/api/audioclip/**").permitAll()
-//                .antMatchers(HttpMethod.GET, "/api/audioAlbum/**").permitAll()
-//                .antMatchers("/webSocket").permitAll()
+                .requestMatchers("/index.html").permitAll()
+//                .requestMatchers("/**").permitAll()
                 .anyRequest().authenticated()
                 // JWT 인증/인가를 사용하기 위한 설정
                 .and()
                 .addFilterBefore(new JwtAuthFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
-//                .oauth2Login();
-//                .logout()//oauth2 관련 내용 추가 (89번째 줄까지)
-//                .logoutSuccessUrl("/")
-//                .and()
-//                .oauth2Login()
-//                .defaultSuccessUrl("/login-success")
-//                .userInfoEndpoint()
-//                .userService(customOAuth2MemberService);
-
-        //Controller 단 전에 시큐리티에서 검사하므로 따로 Exceptionhandler가 필요하다
-//        http.exceptionHandling().authenticationEntryPoint(customAuthenticationEntryPoint);
-//        http.exceptionHandling().accessDeniedHandler(customAccessDeniedHandler);
         http.cors(withDefaults());
         return http.build();
     }
@@ -97,27 +78,40 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry
                 .addMapping("/**")
-                .allowedOrigins("http://localhost:3000", "http://localhost:8080", "http://15.164.44.185")
-                .allowedOriginPatterns("*") // 허용되는 출처 패턴을 사용하여 와일드카드(*) 지정
-                .allowedMethods("*")
+                .allowedOrigins("http://localhost:3000", "http://localhost:8080", "http://13.125.83.69")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
-                .exposedHeaders("*")
+//                .exposedHeaders("*")
                 .allowCredentials(true)
                 .maxAge(3600 * 24 * 365);
     }
+//
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration config = new CorsConfiguration();
+//
+//        config.setAllowedOriginPatterns(Arrays.asList("*")); // 허용되는 출처 패턴을 사용하여 와일드카드(*) 지정
+//        config.setAllowedMethods(Arrays.asList("*"));
+//        config.setAllowedHeaders(Arrays.asList("*"));
+//        config.setAllowCredentials(true);
+//        config.addExposedHeader("*");
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", config);
+//        return source;
+//    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-
-        config.setAllowedOriginPatterns(Arrays.asList("*")); // 허용되는 출처 패턴을 사용하여 와일드카드(*) 지정
-        config.setAllowedMethods(Arrays.asList("*"));
-        config.setAllowedHeaders(Arrays.asList("*"));
-        config.setAllowCredentials(true);
-        config.addExposedHeader("*");
-
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.setAllowedOrigins(List.of("http://localhost:3000/", "http://localhost:8080/", "http://13.125.83.69"));
+        corsConfiguration.setAllowedHeaders(List.of("*"));
+        corsConfiguration.setMaxAge(3600L * 24 * 365);
+        corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "PATCH"));
+        corsConfiguration.setAllowCredentials(true); // 쿠키 허용
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
+        source.registerCorsConfiguration("/**", corsConfiguration);
         return source;
     }
+
 }

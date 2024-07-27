@@ -1,15 +1,13 @@
 package com.ppyongppyong.server.user.service;
 
+import com.ppyongppyong.server.common.UserDetailsImpl;
 import com.ppyongppyong.server.common.entity.RefreshToken;
 import com.ppyongppyong.server.common.entity.TokenType;
 import com.ppyongppyong.server.common.exception.CustomException;
 import com.ppyongppyong.server.common.exception.massage.ErrorMsg;
 import com.ppyongppyong.server.common.jwt.JwtUtil;
 import com.ppyongppyong.server.common.repository.RefreshTokenRepository;
-import com.ppyongppyong.server.user.dto.UserLoginRequestDto;
-import com.ppyongppyong.server.user.dto.UserLoginResponseDto;
-import com.ppyongppyong.server.user.dto.UserMapper;
-import com.ppyongppyong.server.user.dto.UserSignupRequestDto;
+import com.ppyongppyong.server.user.dto.*;
 import com.ppyongppyong.server.user.entity.User;
 import com.ppyongppyong.server.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,8 +22,11 @@ import org.springframework.validation.annotation.Validated;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import static com.ppyongppyong.server.common.exception.massage.ErrorMsg.NOT_FOUND_USER;
 import static com.ppyongppyong.server.common.exception.massage.SuccessMsg.SIGN_UP_SUCCESS;
 import static com.ppyongppyong.server.common.exception.massage.SuccessMsg.TOKEN_REISSUE_SUCCESS;
 
@@ -43,16 +44,16 @@ public class UserService {
     //회원가입
     @Transactional
     public String signup(@Valid UserSignupRequestDto userSignupRequestDto) {
-        if(!userSignupRequestDto.getPassword().equals(userSignupRequestDto.getPasswordCheck())) {
+        if (!userSignupRequestDto.getPassword().equals(userSignupRequestDto.getPasswordCheck())) {
             throw new CustomException(ErrorMsg.NOT_MATCH_CHECK_PASSWORD);
         }
 
         String password = passwordEncoder.encode(userSignupRequestDto.getPassword());
 
         Optional<User> foundUserId = userRepository.findByUserId(userSignupRequestDto.getUserId());
-        if(foundUserId.isPresent()) {
+        if (foundUserId.isPresent()) {
             User user = foundUserId.get();
-            if(user.isActive()) {
+            if (user.isActive()) {
                 user.updateIsActive(false);
                 userRepository.save(user);
                 return SIGN_UP_SUCCESS.getMessage();
@@ -75,7 +76,7 @@ public class UserService {
                 () -> new CustomException(ErrorMsg.NOT_FOUND_USER)
         );
 
-        if(!passwordEncoder.matches(password, user.getPassword())) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new CustomException(ErrorMsg.NOT_MATCH_PASSWORD);
         }
 
@@ -104,7 +105,7 @@ public class UserService {
         Optional<RefreshToken> refreshToken = refreshTokenRepository.findByUserId(user.getUserId());
         Long expiration = JwtUtil.REFRESH_TOKEN_TIME / 1000;
 
-        if(refreshToken.isPresent()) {
+        if (refreshToken.isPresent()) {
             RefreshToken saveedRefreshToken = refreshToken.get().updateToken(createRefreshToken);
             refreshTokenRepository.save(saveedRefreshToken);
         } else {
@@ -182,5 +183,15 @@ public class UserService {
 
         getAccessToken(user, httpServletResponse);
         return TOKEN_REISSUE_SUCCESS.getMessage();
+    }
+
+    public List<UserDataDto> searchUser(User searcher, String searchStr) {
+        // 유저 인증
+        User user = userRepository.findByUserId(searcher.getUserId()).orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+        List<User> users = userRepository.findByUserIdContaining(searchStr);
+        // 본인 제외?
+        users.removeIf(u -> u.getId() == user.getId());
+
+       return users.stream().map(u -> userMapper.entityToUserDataDto(u)).collect(Collectors.toList());
     }
 }

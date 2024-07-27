@@ -32,6 +32,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String accessToken = null;
         String refreshToken = null;
 
+        log.info("cookies: ", cookies);
+
         if(cookies != null) {
             for(Cookie cookie : cookies) {
                 if(cookie == null) {
@@ -44,6 +46,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 }
             }
         }
+
+        log.info("Access Token: {}", accessToken);
+        log.info("Refresh Token: {}", refreshToken);
 
         if(accessToken != null) {
             if (jwtUtil.validateToken(accessToken) == TokenState.VALID) {
