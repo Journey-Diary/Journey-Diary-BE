@@ -11,6 +11,8 @@ import com.ppyongppyong.server.plan.repository.DateRepository;
 import com.ppyongppyong.server.plan.repository.PlanDataRepository;
 import com.ppyongppyong.server.plan.repository.PlanRepository;
 import com.ppyongppyong.server.plan.repository.PostRepository;
+import com.ppyongppyong.server.user.dto.UserDataDto;
+import com.ppyongppyong.server.user.dto.UserMapper;
 import com.ppyongppyong.server.user.entity.Group;
 import com.ppyongppyong.server.user.entity.GroupTypeEnum;
 import com.ppyongppyong.server.user.entity.User;
@@ -24,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -45,6 +48,7 @@ public class PlanService {
     private final PlanDataMapper planDataMapper;
     private final PlanDataRepository planDataRepository;
     private final DateRepository dateRepository;
+    private final UserMapper userMapper;
 
     @Transactional
     public PlanPorJCreateResponse createPlanPorJ(PlanPorJCreateRequest planPorJCreateRequest, UserDetailsImpl userDetails) {
@@ -89,8 +93,9 @@ public class PlanService {
             planData.increaseHit();
             planDataRepository.save(planData);
         }
-
-        return planDataMapper.planDataToPlanResponse(planData, plan);
+        List<UserDataDto> userDtos = userRepository.findAllById(userIds).stream().map(u -> userMapper.entityToUserDataDto(u))
+                .collect(Collectors.toList());
+        return planDataMapper.planDataToPlanResponse(planData, plan, userDtos);
     }
 
     @Transactional
@@ -213,7 +218,12 @@ public class PlanService {
 
         planDataRepository.save(planData);
 
-        return planDataMapper.planDataToPlanResponse(planData, plan);
+        List<Long> userIds = userGroupConnectRepository.findByGroup(plan.getGroup()).stream()
+                .map(c -> c.getUser().getId()).collect(Collectors.toList());
+
+        List<UserDataDto> userDtos = userRepository.findAllById(userIds).stream()
+                .map(u -> userMapper.entityToUserDataDto(u)).collect(Collectors.toList());
+        return planDataMapper.planDataToPlanResponse(planData, plan, userDtos);
     }
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");

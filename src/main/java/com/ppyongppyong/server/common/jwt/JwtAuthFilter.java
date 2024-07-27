@@ -32,8 +32,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String accessToken = null;
         String refreshToken = null;
 
-        log.info("cookies: ", cookies);
-
         if(cookies != null) {
             for(Cookie cookie : cookies) {
                 if(cookie == null) {
