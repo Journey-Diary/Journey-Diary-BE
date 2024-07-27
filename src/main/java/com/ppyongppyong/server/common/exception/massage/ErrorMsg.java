@@ -32,7 +32,7 @@ public enum ErrorMsg {
 
     //403 FORBIDDEN : 권한 없음
     CANNOT_ACCESS_PLAN(HttpStatus.FORBIDDEN, "조회 권한이 없습니다."),
-    CANNOT_UPDATE_POST(HttpStatus.FORBIDDEN, "작성 및 수정 권한이 없습니다."),
+    CANNOT_UPDATE_POST(HttpStatus.FORBIDDEN, "팀장 권한이 없습니다."),
     CANNOT_CREATE_POST(HttpStatus.FORBIDDEN, "날짜 선택 후 포스트를 생성할 수 있습니다"),
 
     //404 NOT_FOUND : Resource 를 찾을 수 없음

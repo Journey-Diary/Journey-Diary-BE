@@ -13,10 +13,7 @@ import com.ppyongppyong.server.plan.repository.PlanRepository;
 import com.ppyongppyong.server.plan.repository.PostRepository;
 import com.ppyongppyong.server.user.dto.UserDataDto;
 import com.ppyongppyong.server.user.dto.UserMapper;
-import com.ppyongppyong.server.user.entity.Group;
-import com.ppyongppyong.server.user.entity.GroupTypeEnum;
-import com.ppyongppyong.server.user.entity.User;
-import com.ppyongppyong.server.user.entity.UserGroupConnect;
+import com.ppyongppyong.server.user.entity.*;
 import com.ppyongppyong.server.user.repository.GroupRepository;
 import com.ppyongppyong.server.user.repository.UserGroupConnectRepository;
 import com.ppyongppyong.server.user.repository.UserRepository;
@@ -234,5 +231,37 @@ public class PlanService {
 
     private int localDateToInteger(LocalDate date) {
         return Integer.parseInt(date.format(formatter));
+    }
+
+    @Transactional
+    public void addGroupMember(Long planId, List<String> userIds, UserDetailsImpl userDetails) {
+
+        // 유저 인증
+        User user = userRepository
+                .findByUserId(userDetails.getUsername()).orElseThrow(() -> new CustomException(NOT_FOUND_USER));
+
+        // 플랜 조회
+        Plan plan = planRepository.findById(planId).orElseThrow(() -> new CustomException(NOT_FOUND_PLAN));
+
+        // 팀장인지 확인
+        validateLeader(user, plan);
+
+        Group group = plan.getGroup();
+
+        List<String> oriMembers = userGroupConnectRepository.findByGroup(group).stream()
+                .map(c -> c.getUser().getUserId()).collect(Collectors.toList());
+
+        // 팀원 추가
+        List<UserGroupConnect> connects = new ArrayList<>();
+        userIds.stream().filter(i -> !oriMembers.contains(i)).forEach(i -> {
+
+            User member = userRepository.findByUserId(i).orElse(null);
+            if (member == null)
+                throw new CustomException(NOT_FOUND_USER);
+
+            connects.add(UserGroupConnect.builder().group(group)
+                    .userGroupRoleEnum(UserGroupRoleEnum.MEMBER).user(member).isInvited(false).build());
+        });
+        userGroupConnectRepository.saveAll(connects);
     }
 }

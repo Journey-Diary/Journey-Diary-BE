@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/plan")
@@ -41,6 +43,15 @@ public class PlanController {
     public ResponseEntity<PlanDataResponseDto> updatePlan(@PathVariable Long planId, @RequestBody PlanDataRequestDto requestDto,
                                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity.ok(planService.updatePlan(planId, requestDto, userDetails));
+    }
+
+    @Operation(summary = "plan 팀원 추가")
+    @PostMapping("/member/{planId}")
+    public ResponseEntity addGroupMember(@PathVariable Long planId, @RequestBody List<String> userIds,
+                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        planService.addGroupMember(planId, userIds, userDetails);
+
+        return ResponseEntity.ok().build();
     }
 
 
