@@ -47,14 +47,14 @@ jobs:
 
 
 
-      ## create application.properties
-      - name: make application.properties
+      ## create application.yml
+      - name: make application.yml
         run:
-          touch ./src/main/resources/application.properties
+          touch ./src/main/resources/application.yml
         shell: bash
 
-      - name: deliver application.properties
-        run: echo "${{ secrets.APPLICATION_DEV }}" > ./src/main/resources/application.properties
+      - name: deliver application.yml
+        run: echo "${{ secrets.APPLICATION_DEV }}" > ./src/main/resources/application.yml
         shell: bash
 
 
