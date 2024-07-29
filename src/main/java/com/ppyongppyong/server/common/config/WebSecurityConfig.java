@@ -109,6 +109,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         corsConfiguration.setMaxAge(3600L * 24 * 365);
         corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "PATCH"));
         corsConfiguration.setAllowCredentials(true); // 쿠키 허용
+        corsConfiguration.setExposedHeaders(List.of("Authorization"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);
         return source;
