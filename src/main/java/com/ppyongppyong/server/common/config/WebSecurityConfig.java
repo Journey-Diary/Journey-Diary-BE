@@ -31,7 +31,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @RequiredArgsConstructor
-@EnableWebSecurity//@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET) //붐비 붐비에 추가 되어 있는 내용
+@EnableWebSecurity
 public class WebSecurityConfig implements WebMvcConfigurer {
 
     private final JwtUtil jwtUtil;
@@ -41,10 +41,8 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         return new BCryptPasswordEncoder();
     }
 
-
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-
         return (web) -> web.ignoring()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/docs/**")
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
@@ -53,53 +51,35 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-                //로그인 된 후 토큰없이 자동 인증되는 것을 방지
-                .sessionManagement((sessionManagement) ->
+                .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
 
-        //회원가입, 로그인,조회까지는 security 인증 없이도 가능함
         http.authorizeRequests()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                 .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/docs/**").permitAll()
                 .requestMatchers("/api/user/signup").permitAll()
                 .requestMatchers("/api/user/login").permitAll()
                 .requestMatchers("/index.html").permitAll()
-//                .requestMatchers("/**").permitAll()
+                .requestMatchers("/api/user/search").authenticated() // 인증이 필요한 엔드포인트 추가
                 .anyRequest().authenticated()
-                // JWT 인증/인가를 사용하기 위한 설정
                 .and()
                 .addFilterBefore(new JwtAuthFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+
         http.cors(withDefaults());
         return http.build();
     }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry
-                .addMapping("/**")
+        registry.addMapping("/**")
                 .allowedOrigins("http://localhost:3000", "http://localhost:8080", "http://13.125.83.69")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
-                .allowedHeaders("*")
-//                .exposedHeaders("*")
+                .allowedHeaders("Authorization", "Cache-Control", "Content-Type")
+                .exposedHeaders("Authorization")
                 .allowCredentials(true)
                 .maxAge(3600 * 24 * 365);
     }
-//
-//    @Bean
-//    public CorsConfigurationSource corsConfigurationSource() {
-//        CorsConfiguration config = new CorsConfiguration();
-//
-//        config.setAllowedOriginPatterns(Arrays.asList("*")); // 허용되는 출처 패턴을 사용하여 와일드카드(*) 지정
-//        config.setAllowedMethods(Arrays.asList("*"));
-//        config.setAllowedHeaders(Arrays.asList("*"));
-//        config.setAllowCredentials(true);
-//        config.addExposedHeader("*");
-//
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", config);
-//        return source;
-//    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -114,5 +94,4 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         source.registerCorsConfiguration("/**", corsConfiguration);
         return source;
     }
-
 }
